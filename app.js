@@ -1,5 +1,6 @@
 let app = new PIXI.Application();
 let spaceship, state
+let direction = 0;
 document.body.appendChild(app.view);
 
 PIXI.loader
@@ -7,6 +8,7 @@ PIXI.loader
   .add("./images/splash.bmp")
   .add("./images/rubble.bmp")
   .add("./images/space.bmp")
+  .add("./images/enemy2.png")
   .load(setup);
 
 function setup() {
@@ -24,10 +26,12 @@ function setup() {
     spaceship.scale.x = 0.75;
     spaceship.vy = 0;
     spaceship.vx = 0;
+    enemies = [];
     let left = keyboard("ArrowLeft"),
     up = keyboard("ArrowUp"),
     right = keyboard("ArrowRight"),
     down = keyboard("ArrowDown");
+
 
 left.press = () => {
   spaceship.vx = -4;
@@ -74,6 +78,8 @@ down.release = () => {
 };
 
 state = play;
+spawn();
+setDirection();
 app.ticker.add(delta => gameLoop(delta));
 
     function gameLoop(delta){
@@ -81,7 +87,17 @@ app.ticker.add(delta => gameLoop(delta));
       state(delta);
       background.tilePosition.x -= 0.1;
       rubble.tilePosition.x -= 0.2;
-      contain(spaceship);
+      contain(spaceship)
+      enemies.forEach(function(element) {
+          element.x -= 1;
+          element.y -= direction;
+          console.log (element.y)
+          containEnemy(element);
+          if (element.x < -100)
+          {
+            app.stage.removeChild(element);
+          }
+      });
     };
 };
 
@@ -137,27 +153,47 @@ function keyboard(value) {
 
 function contain(spaceship) {
 
-  let collision = undefined;
-
   if (spaceship.x < 0) {
     spaceship.x = 0;
-    collision = "left";
   }
 
   if (spaceship.y < 0) {
     spaceship.y = 0;
-    collision = "top";
   }
 
   if (spaceship.x + spaceship.width > 800) {
     spaceship.x = 800 - spaceship.width;
-    collision = "right";
   }
 
   if (spaceship.y + spaceship.height > 600) {
     spaceship.y = 600 - spaceship.height;
-    collision = "bottom";
+  }
+}
+
+function containEnemy (enemy)
+{
+  if (enemy.y < 0) {
+    enemy.y = 0;
   }
 
-  return collision;
+  if (enemy.y + enemy.height > 600) {
+    enemy.y = 600 - enemy.height;
+  }
+}
+
+function spawn (){
+  spawnInterval = setInterval(function() {
+  let enemy = new PIXI.Sprite(
+    PIXI.loader.resources["./images/enemy2.png"].texture);
+  enemy.x = 800;
+  enemy.y = Math.floor(Math.random() * (600 - enemy.height));
+  app.stage.addChild(enemy);
+  enemies.push(enemy);
+  }, 2000)
+}
+
+function setDirection(){
+  directionInterval = setInterval(function() {
+      direction = (Math.random() * 5) -3 ;
+    }, 2000)
 }
