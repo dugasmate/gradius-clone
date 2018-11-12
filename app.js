@@ -4,16 +4,20 @@ document.body.appendChild(app.view);
 
 PIXI.loader
   .add("./images/spaceship.bmp")
-  .add("./images/space.bmp")
   .add("./images/splash.bmp")
+  .add("./images/rubble.bmp")
+  .add("./images/space.bmp")
   .load(setup);
 
 function setup() {
-  let background = new PIXI.Sprite(
-    PIXI.loader.resources["./images/space.bmp"].texture);
+  let background = new PIXI.extras.TilingSprite(
+    PIXI.loader.resources["./images/space.bmp"].texture, 800, 600);
   spaceship = new PIXI.Sprite(
     PIXI.loader.resources["./images/spaceship.bmp"].texture);
+  let rubble = new PIXI.extras.TilingSprite(
+    PIXI.loader.resources["./images/rubble.bmp"].texture, 800, 600);
     app.stage.addChild(background);
+    app.stage.addChild(rubble);
     app.stage.addChild(spaceship);
     spaceship.y = 280;
     spaceship.scale.y = 0.60;
@@ -75,7 +79,9 @@ app.ticker.add(delta => gameLoop(delta));
     function gameLoop(delta){
 
       state(delta);
-      background.x -= 0.1;
+      background.tilePosition.x -= 0.1;
+      rubble.tilePosition.x -= 0.2;
+      contain(spaceship);
     };
 };
 
@@ -125,6 +131,33 @@ function keyboard(value) {
     window.removeEventListener("keydown", downListener);
     window.removeEventListener("keyup", upListener);
   };
-  
+
   return key;
+}
+
+function contain(spaceship) {
+
+  let collision = undefined;
+
+  if (spaceship.x < 0) {
+    spaceship.x = 0;
+    collision = "left";
+  }
+
+  if (spaceship.y < 0) {
+    spaceship.y = 0;
+    collision = "top";
+  }
+
+  if (spaceship.x + spaceship.width > 800) {
+    spaceship.x = 800 - spaceship.width;
+    collision = "right";
+  }
+
+  if (spaceship.y + spaceship.height > 600) {
+    spaceship.y = 600 - spaceship.height;
+    collision = "bottom";
+  }
+
+  return collision;
 }
