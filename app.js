@@ -85,27 +85,33 @@ app.ticker.add(delta => gameLoop(delta));
     function gameLoop(delta){
 
       state(delta);
-      background.tilePosition.x -= 0.1;
-      rubble.tilePosition.x -= 0.2;
-      contain(spaceship)
-      enemies.forEach(function(element) {
-          element.x -= 1;
-          element.y -= direction;
-          console.log (element.y)
-          containEnemy(element);
-          if (element.x < -100)
-          {
-            app.stage.removeChild(element);
-          }
-      });
+      background.tilePosition.x -= 0.3;
+      rubble.tilePosition.x -= 0.7;
+    
     };
 };
 
 function play(delta) {
-  
+  random = randomInt(0, 2);
   spaceship.x += spaceship.vx;
   spaceship.y += spaceship.vy;
-};
+  contain(spaceship)
+  enemies.forEach(function(element) {
+  element.x -= 1;
+  element.y += direction * random;
+  containEnemy(element);
+  if (element.x < -100)
+  {
+    app.stage.removeChild(element);
+  }
+    
+  if (hitTestRectangle(spaceship, element)) {
+
+  app.stage.removeChild(spaceship);
+
+  }
+  });
+  };
 
 function keyboard(value) {
   let key = {};
@@ -186,7 +192,7 @@ function spawn (){
   let enemy = new PIXI.Sprite(
     PIXI.loader.resources["./images/enemy2.png"].texture);
   enemy.x = 800;
-  enemy.y = Math.floor(Math.random() * (600 - enemy.height));
+  enemy.y = randomInt(0, 600 - enemy.height);
   app.stage.addChild(enemy);
   enemies.push(enemy);
   }, 2000)
@@ -194,6 +200,61 @@ function spawn (){
 
 function setDirection(){
   directionInterval = setInterval(function() {
-      direction = (Math.random() * 5) -3 ;
+      direction = randomInt(-1, 1);
     }, 2000)
+}
+
+function hitTestRectangle(r1, r2) {
+
+  //Define the variables we'll need to calculate
+  let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
+
+  //hit will determine whether there's a collision
+  hit = false;
+
+  //Find the center points of each sprite
+  r1.centerX = r1.x + r1.width / 2;
+  r1.centerY = r1.y + r1.height / 2;
+  r2.centerX = r2.x + r2.width / 2;
+  r2.centerY = r2.y + r2.height / 2;
+
+  //Find the half-widths and half-heights of each sprite
+  r1.halfWidth = r1.width / 2;
+  r1.halfHeight = r1.height / 2;
+  r2.halfWidth = r2.width / 2;
+  r2.halfHeight = r2.height / 2;
+
+  //Calculate the distance vector between the sprites
+  vx = r1.centerX - r2.centerX;
+  vy = r1.centerY - r2.centerY;
+
+  //Figure out the combined half-widths and half-heights
+  combinedHalfWidths = r1.halfWidth + r2.halfWidth;
+  combinedHalfHeights = r1.halfHeight + r2.halfHeight;
+
+  //Check for a collision on the x axis
+  if (Math.abs(vx) < combinedHalfWidths) {
+
+    //A collision might be occurring. Check for a collision on the y axis
+    if (Math.abs(vy) < combinedHalfHeights) {
+
+      //There's definitely a collision happening
+      hit = true;
+    } else {
+
+      //There's no collision on the y axis
+      hit = false;
+    }
+  } else {
+
+    //There's no collision on the x axis
+    hit = false;
+  }
+
+  //`hit` will be either `true` or `false`
+  return hit;
+};
+
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
