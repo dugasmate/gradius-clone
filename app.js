@@ -9,6 +9,7 @@ PIXI.loader
   .add("./images/rubble.bmp")
   .add("./images/space.bmp")
   .add("./images/enemy2.png")
+  .add("./images/missile.bmp")
   .load(setup);
 
 function setup() {
@@ -27,11 +28,23 @@ function setup() {
     spaceship.vy = 0;
     spaceship.vx = 0;
     enemies = [];
+    bullets = [];
     let left = keyboard("ArrowLeft"),
     up = keyboard("ArrowUp"),
     right = keyboard("ArrowRight"),
     down = keyboard("ArrowDown");
+    a = keyboard("a");
 
+    a.press = () => {
+      shoot();
+      console.log("lőőőő")
+    };
+    
+    // left.release = () => {
+    //   if (!right.isDown && spaceship.vy === 0) {
+    //     spaceship.vx = 0;
+    //   }
+    // };
 
 left.press = () => {
   spaceship.vx = -4;
@@ -96,6 +109,24 @@ function play(delta) {
   spaceship.x += spaceship.vx;
   spaceship.y += spaceship.vy;
   contain(spaceship)
+  bullets.forEach(function(bullet){
+    bullet.x += 5;
+    if (bullet.x > 800)
+    {
+      app.stage.removeChild(bullet);
+      bullets.splice(bullet, 1);
+    }
+      
+     enemies.forEach(function(enemy)
+     {
+      if (hitTestRectangle(bullet, enemy)) {
+
+         app.stage.removeChild(enemy);
+         enemies.splice(enemy, 1);
+      
+       }
+    })
+  });
   enemies.forEach(function(element) {
   element.x -= 1;
   element.y += direction * random;
@@ -198,6 +229,20 @@ function spawn (){
   }, 2000)
 }
 
+function shoot (){
+    if (bullets.length < 5)
+    {
+      let bullet = new PIXI.Sprite(
+        PIXI.loader.resources["./images/missile.bmp"].texture);
+        app.stage.addChild(bullet);
+        bullet.scale.x = 0.08;
+        bullet.scale.y = 0.1;
+        bullet.x = spaceship.x + 90;
+        bullet.y = spaceship.y + 25;
+    bullets.push(bullet);
+    }
+};
+
 function setDirection(){
   directionInterval = setInterval(function() {
       direction = randomInt(-1, 1);
@@ -206,52 +251,40 @@ function setDirection(){
 
 function hitTestRectangle(r1, r2) {
 
-  //Define the variables we'll need to calculate
   let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
 
-  //hit will determine whether there's a collision
   hit = false;
 
-  //Find the center points of each sprite
   r1.centerX = r1.x + r1.width / 2;
   r1.centerY = r1.y + r1.height / 2;
   r2.centerX = r2.x + r2.width / 2;
   r2.centerY = r2.y + r2.height / 2;
 
-  //Find the half-widths and half-heights of each sprite
   r1.halfWidth = r1.width / 2;
   r1.halfHeight = r1.height / 2;
   r2.halfWidth = r2.width / 2;
   r2.halfHeight = r2.height / 2;
 
-  //Calculate the distance vector between the sprites
   vx = r1.centerX - r2.centerX;
   vy = r1.centerY - r2.centerY;
 
-  //Figure out the combined half-widths and half-heights
   combinedHalfWidths = r1.halfWidth + r2.halfWidth;
   combinedHalfHeights = r1.halfHeight + r2.halfHeight;
 
-  //Check for a collision on the x axis
   if (Math.abs(vx) < combinedHalfWidths) {
 
-    //A collision might be occurring. Check for a collision on the y axis
     if (Math.abs(vy) < combinedHalfHeights) {
 
-      //There's definitely a collision happening
       hit = true;
     } else {
 
-      //There's no collision on the y axis
       hit = false;
     }
   } else {
 
-    //There's no collision on the x axis
     hit = false;
   }
 
-  //`hit` will be either `true` or `false`
   return hit;
 };
 
