@@ -37,6 +37,9 @@ gameOverScreen = new PIXI.Sprite(
     gameScene.addChild(background);
     gameScene.addChild(rubble);
 gameOverScene.addChild(gameOverScreen);
+menuScene.addChild(button);
+
+button.on('mousedown', startButton);
 gameOverScene.visible = false;  
 enemies = [];
 bullets = [];
@@ -106,9 +109,8 @@ app.ticker.add(delta => gameLoop(delta));
     };
 };
 function menu() {
+  gameOverScene.visible = false;
   menuScene.visible = true;
-  setTimeout(() => menuScene.addChild(button), 1000)
-  button.on('mousedown', startButton);
 };
 
 
@@ -162,8 +164,7 @@ function gameOver() {
     gameScene.removeChild(bullet);
     });
   enemies = [];
-  gameOverScene.addChild(button);
-  button.on('mousedown', menuButton);
+  setTimeout(function(){state = menu}, 5000);
 }
   
 function keyboard(value) {
@@ -331,10 +332,6 @@ function startButton (eventData) {
 
   state = start
   menuScene.visible = false;
-}
-
-function menuButton (eventData) {
-
-  state = menu
-  gameOverScene.visible = false;
+  
+console.log(state)
 }
