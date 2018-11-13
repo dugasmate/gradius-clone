@@ -5,7 +5,7 @@ document.body.appendChild(app.view);
 
 PIXI.loader
   .add("./images/spaceship.bmp")
-  .add("./images/splash.bmp")
+  .add("./images/gameover.bmp")
   .add("./images/rubble.bmp")
   .add("./images/space.bmp")
   .add("./images/enemy2.png")
@@ -13,15 +13,24 @@ PIXI.loader
   .load(setup);
 
 function setup() {
+  
+state = play;
+  gameOverScene = new PIXI.Container();
+  gameScene = new PIXI.Container();
+  app.stage.addChild(gameOverScene);
+  app.stage.addChild(gameScene);
+gameOverScreen = new PIXI.Sprite(
+  PIXI.loader.resources["./images/gameover.bmp"].texture);
+gameOverScene.addChild(gameOverScreen);
   let background = new PIXI.extras.TilingSprite(
     PIXI.loader.resources["./images/space.bmp"].texture, 800, 600);
   spaceship = new PIXI.Sprite(
     PIXI.loader.resources["./images/spaceship.bmp"].texture);
   let rubble = new PIXI.extras.TilingSprite(
     PIXI.loader.resources["./images/rubble.bmp"].texture, 800, 600);
-    app.stage.addChild(background);
-    app.stage.addChild(rubble);
-    app.stage.addChild(spaceship);
+    gameScene.addChild(background);
+    gameScene.addChild(rubble);
+    gameScene.addChild(spaceship);
     spaceship.y = 280;
     spaceship.scale.y = 0.60;
     spaceship.scale.x = 0.75;
@@ -35,16 +44,10 @@ function setup() {
     down = keyboard("ArrowDown");
     a = keyboard("a");
 
-    a.press = () => {
-      shoot();
-      console.log("lőőőő")
-    };
-    
-    // left.release = () => {
-    //   if (!right.isDown && spaceship.vy === 0) {
-    //     spaceship.vx = 0;
-    //   }
-    // };
+a.press = () => {
+    shoot();
+    console.log("lőőőő")
+};
 
 left.press = () => {
   spaceship.vx = -4;
@@ -89,8 +92,6 @@ down.release = () => {
     spaceship.vy = 0;
   }
 };
-
-state = play;
 spawn();
 setDirection();
 app.ticker.add(delta => gameLoop(delta));
@@ -104,7 +105,7 @@ app.ticker.add(delta => gameLoop(delta));
     };
 };
 
-function play(delta) {
+function play() {
   random = randomInt(0, 2);
   spaceship.x += spaceship.vx;
   spaceship.y += spaceship.vy;
@@ -113,7 +114,7 @@ function play(delta) {
     bullet.x += 5;
     if (bullet.x > 800)
     {
-      app.stage.removeChild(bullet);
+      gameScene.removeChild(bullet);
       bullets.splice(bullet, 1);
     }
       
@@ -121,7 +122,7 @@ function play(delta) {
      {
       if (hitTestRectangle(bullet, enemy)) {
 
-         app.stage.removeChild(enemy);
+        gameScene.removeChild(enemy);
          enemies.splice(enemy, 1);
       
        }
@@ -133,17 +134,22 @@ function play(delta) {
   containEnemy(element);
   if (element.x < -100)
   {
-    app.stage.removeChild(element);
+    gameScene.removeChild(element);
   }
     
   if (hitTestRectangle(spaceship, element)) {
 
-  app.stage.removeChild(spaceship);
+    gameScene.removeChild(spaceship);
+  state = gameOver;
 
   }
   });
   };
-
+function gameOver() {
+  gameScene.visible = false;
+  gameOverScene.visible = true;
+}
+  
 function keyboard(value) {
   let key = {};
   key.value = value;
@@ -224,7 +230,7 @@ function spawn (){
     PIXI.loader.resources["./images/enemy2.png"].texture);
   enemy.x = 800;
   enemy.y = randomInt(0, 600 - enemy.height);
-  app.stage.addChild(enemy);
+  gameScene.addChild(enemy);
   enemies.push(enemy);
   }, 2000)
 }
@@ -234,7 +240,7 @@ function shoot (){
     {
       let bullet = new PIXI.Sprite(
         PIXI.loader.resources["./images/missile.bmp"].texture);
-        app.stage.addChild(bullet);
+        gameScene.addChild(bullet);
         bullet.scale.x = 0.08;
         bullet.scale.y = 0.1;
         bullet.x = spaceship.x + 90;
