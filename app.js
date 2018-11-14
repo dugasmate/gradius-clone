@@ -6,14 +6,14 @@ random = 0;
 document.body.appendChild(app.view);
 PIXI.loader
   .add("./images/splash.bmp")
-  .add("./images/spaceship.bmp")
+  .add("./images/spaceship.png")
   .add("./images/gameover.bmp")
-  .add("./images/rubble.bmp")
+  .add("./images/rubble.png")
   .add("./images/space.bmp")
-  .add("./images/enemy2.png")
-  .add("./images/missile.bmp")
+  .add("./images/enemy.png")
+  .add("./images/missile.png")
   .add("./images/button.bmp")
-  .add("./images/astralogo.png")
+  .add("./images/logo.bmp")
   .add("./images/menubackground.bmp")
   .load(appStart);
 
@@ -29,6 +29,12 @@ function appStart() {
   menuScene.addChild(menuBG);
   var i;
   buttons = [];
+  logo = new PIXI.Sprite(
+    PIXI.loader.resources["./images/logo.bmp"].texture);
+    menuScene.addChild(logo);
+    logo.scale.x = 1.4
+    logo.x = 325;
+    logo.y = 70;
 for (i = 0; i < 4; i++) { 
   button = new PIXI.Sprite(
     PIXI.loader.resources["./images/button.bmp"].texture);
@@ -63,9 +69,9 @@ gameOverScreen = new PIXI.Sprite(
   gameBG = new PIXI.extras.TilingSprite(
     PIXI.loader.resources["./images/space.bmp"].texture, 800, 600);
   spaceship = new PIXI.Sprite(
-    PIXI.loader.resources["./images/spaceship.bmp"].texture);
+    PIXI.loader.resources["./images/spaceship.png"].texture);
   rubble = new PIXI.extras.TilingSprite(
-    PIXI.loader.resources["./images/rubble.bmp"].texture, 800, 600);
+    PIXI.loader.resources["./images/rubble.png"].texture, 800, 600);
     gameScene.addChild(gameBG);
     gameScene.addChild(rubble);
 gameOverScene.addChild(gameOverScreen);
@@ -295,7 +301,7 @@ function containEnemy (enemy)
 
 function spawn (){
   let enemy = new PIXI.Sprite(
-  PIXI.loader.resources["./images/enemy2.png"].texture);
+  PIXI.loader.resources["./images/enemy.png"].texture);
   enemy.x = 800;
   enemy.y = randomInt(0, 600 - enemy.height);
   enemy.vy = randomInt(-1, 1);
@@ -308,7 +314,7 @@ function shoot (){
     {
       bulletCount +=1;
       let bullet = new PIXI.Sprite(
-        PIXI.loader.resources["./images/missile.bmp"].texture);
+        PIXI.loader.resources["./images/missile.png"].texture);
         gameScene.addChild(bullet);
         bullet.scale.x = 0.08;
         bullet.scale.y = 0.1;
@@ -387,7 +393,7 @@ function slow (eventData) {
 }
 
 function medium (eventData) {
-  gameSpeed = 2;
+  gameSpeed = 3;
   start();
 }
 
