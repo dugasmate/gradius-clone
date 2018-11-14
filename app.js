@@ -1,5 +1,5 @@
 let app = new PIXI.Application();
-let spaceship, state, direction
+let spaceship, state, direction, gameSpeed
 document.body.appendChild(app.view);
 PIXI.loader
   .add("./images/splash.bmp")
@@ -12,9 +12,9 @@ PIXI.loader
   .add("./images/button.png")
   .add("./images/astralogo.png")
   .add("./images/menubackground.bmp")
-  .load(setup);
+  .load(appStart);
 
-function setup() {
+function appStart() {
   gameOverScene = new PIXI.Container();
   gameScene = new PIXI.Container();
   menuScene = new PIXI.Container();
@@ -27,21 +27,26 @@ function setup() {
   button = new PIXI.Sprite(
     PIXI.loader.resources["./images/button.png"].texture);
     menuScene.addChild(button);
+    button2 = new PIXI.Sprite(
+      PIXI.loader.resources["./images/button.png"].texture);
+      menuScene.addChild(button2);
+      button2.x = 400;
   splash = new PIXI.Sprite(
     PIXI.loader.resources["./images/splash.bmp"].texture, 800, 600);
   menuScene.addChild(splash);
 gameOverScreen = new PIXI.Sprite(
   PIXI.loader.resources["./images/gameover.bmp"].texture);
-  background = new PIXI.extras.TilingSprite(
+  gameBG = new PIXI.extras.TilingSprite(
     PIXI.loader.resources["./images/space.bmp"].texture, 800, 600);
   spaceship = new PIXI.Sprite(
     PIXI.loader.resources["./images/spaceship.bmp"].texture);
   rubble = new PIXI.extras.TilingSprite(
     PIXI.loader.resources["./images/rubble.bmp"].texture, 800, 600);
-    gameScene.addChild(background);
+    gameScene.addChild(gameBG);
     gameScene.addChild(rubble);
 gameOverScene.addChild(gameOverScreen);
 button.on('mousedown', startButton);
+button2.on('mousedown', startButton2);
 gameOverScene.visible = false;
 enemies = [];
 bullets = [];
@@ -112,13 +117,14 @@ function menu() {
   }
     if (splash.alpha < 0 && state == menu){
   button.interactive = true;
+  button2.interactive = true;
   }
 };
 
 
 function play(delta) {
-  background.tilePosition.x -= 0.3;
-  rubble.tilePosition.x -= 0.7;
+  gameBG.tilePosition.x -= 0.3 * gameSpeed;
+  rubble.tilePosition.x -= 0.7 * gameSpeed;
   random = randomInt(0, 2);
   spaceship.x += spaceship.vx;
   spaceship.y += spaceship.vy;
@@ -141,7 +147,7 @@ function play(delta) {
     })
   });
   enemies.forEach(function(element) {
-  element.x -= 1;
+  element.x -= 1 * gameSpeed;
   element.y += direction * random;
   containEnemy(element);
   if (element.x < -100)
@@ -162,6 +168,7 @@ function gameOver() {
   gameOverScene.visible = true;
   menuScene.visible = true;
   clearInterval(spawnInterval);
+  clearInterval(directionInterval);
   enemies.forEach(function(enemy){
   gameScene.removeChild(enemy);
   });
@@ -171,9 +178,8 @@ function gameOver() {
   enemies = [];
   if (gameOverScreen.alpha > 0){
     fade(gameOverScreen, 1500, .02)
-    console.log(gameOverScreen.alpha)
   }
-  if (gameOverScreen.alpha < -1.8)
+  if (gameOverScreen.alpha < -1.7)
   {
   state = menu;
   }
@@ -254,14 +260,12 @@ function containEnemy (enemy)
 }
 
 function spawn (){
-  console.log("hello");
   let enemy = new PIXI.Sprite(
-    PIXI.loader.resources["./images/enemy2.png"].texture);
+  PIXI.loader.resources["./images/enemy2.png"].texture);
   enemy.x = 800;
   enemy.y = randomInt(0, 600 - enemy.height);
   gameScene.addChild(enemy);
   enemies.push(enemy);
-  console.log(enemies.length)
 }
 
 function shoot (){
@@ -279,9 +283,8 @@ function shoot (){
 };
 
 function setDirection(){
-  directionInterval = setInterval(function() {
-      direction = randomInt(-1, 1);
-    }, 2000)
+      direction = randomInt(-1, 1) * (gameSpeed / 2);
+      console.log(direction);
 }
 
 function hitTestRectangle(r1, r2) {
@@ -331,24 +334,28 @@ function start(){
   gameOverScene.visible = false;
   gameOverScreen.alpha = 1;
   button.interactive = false;
+  button2.interactive = false;
   spaceship.x = 0;
   spaceship.y = 280;
   spaceship.scale.y = 0.60;
   spaceship.scale.x = 0.75;
   spaceship.vy = 0;
   spaceship.vx = 0;
-  spawnInterval = setInterval(spawn, 2000);
+  directionInterval = setInterval(setDirection, 2000 / gameSpeed);
+  spawnInterval = setInterval(spawn, 2000 / gameSpeed);
   gameScene.addChild(spaceship);
   gameScene.visible = true;
   state = play;
-  setDirection();
 }
 
 function startButton (eventData) {
+  gameSpeed = 1;
+  start();
+}
 
-  state = start
-  
-console.log(state)
+function startButton2 (eventData) {
+  gameSpeed = 10;
+  start();
 }
 
 function fade (scene, timeout, speed) {
@@ -356,6 +363,5 @@ function fade (scene, timeout, speed) {
 
 function fader (scene, speed) {
   scene.alpha -= speed;
-  console.log(scene.alpha)
 }
 }
