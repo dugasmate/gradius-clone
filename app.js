@@ -33,26 +33,26 @@ for (i = 0; i < 4; i++) {
   button = new PIXI.Sprite(
     PIXI.loader.resources["./images/button.bmp"].texture);
     menuScene.addChild(button);
-    button.y = 220 + i * 100;
+    button.y = 210 + i * 100;
     button.x = 120;
     buttons.push(button);
     console.log(buttons);
 }
   easyText = new PIXI.Text("Easy");
   menuScene.addChild(easyText);
-  easyText.y = 245;
+  easyText.y = 235;
   easyText.x = 190;
   mediumText = new PIXI.Text("Medium");
   menuScene.addChild(mediumText);
-  mediumText.y = 345;
+  mediumText.y = 335;
   mediumText.x = 175;
   hardText = new PIXI.Text("Hard");
   menuScene.addChild(hardText);
-  hardText.y = 445;
+  hardText.y = 435;
   hardText.x = 192;
   exitText = new PIXI.Text("Exit");
   menuScene.addChild(exitText);
-  exitText.y = 545;
+  exitText.y = 535;
   exitText.x = 195;
   
   splash = new PIXI.Sprite(
@@ -364,12 +364,14 @@ function start(){
   menuScene.visible = false;
   gameOverScene.visible = false;
   gameOverScreen.alpha = 1;
+  buttons[0].interactive = false;
   buttons[1].interactive = false;
   buttons[2].interactive = false;
+  buttons[3].interactive = false;
   spaceship.x = 0;
   spaceship.y = 280;
   spaceship.scale.y = 0.60;
-  spaceship.scale.x = 0.75;
+  spaceship.scale.x = 0.65;
   spaceship.vy = 0;
   spaceship.vx = 0;
   spawnInterval = setInterval(spawn, 2000 / gameSpeed);
@@ -395,7 +397,7 @@ function fast (eventData) {
 }
 
 function exit (eventData) {
-  window.location.href = "https://github.com/dugasmate"
+  window.location.href = "https://github.com/dugasmate/gradius-clone"
 }
 
 function fade (scene, timeout, speed) {
