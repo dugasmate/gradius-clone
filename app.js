@@ -15,6 +15,7 @@ PIXI.loader
   .add("./images/button.bmp")
   .add("./images/logo.bmp")
   .add("./images/menubackground.bmp")
+  .add("./images/bgship.png")
   .load(appStart);
 
 function appStart() {
@@ -27,7 +28,9 @@ function appStart() {
   menuBG = new PIXI.Sprite(
     PIXI.loader.resources["./images/menubackground.bmp"].texture, 800, 600);
   menuScene.addChild(menuBG);
-  var i;
+  bgship = new PIXI.Sprite(
+    PIXI.loader.resources["./images/bgship.png"].texture);
+  menuScene.addChild(bgship);
   buttons = [];
   logo = new PIXI.Sprite(
     PIXI.loader.resources["./images/logo.bmp"].texture);
@@ -35,14 +38,13 @@ function appStart() {
     logo.scale.x = 1.4
     logo.x = 325;
     logo.y = 70;
-for (i = 0; i < 4; i++) { 
+for (var i = 0; i < 4; i++) { 
   button = new PIXI.Sprite(
     PIXI.loader.resources["./images/button.bmp"].texture);
     menuScene.addChild(button);
     button.y = 210 + i * 100;
     button.x = 120;
     buttons.push(button);
-    console.log(buttons);
 }
   easyText = new PIXI.Text("Easy");
   menuScene.addChild(easyText);
@@ -60,7 +62,6 @@ for (i = 0; i < 4; i++) {
   menuScene.addChild(exitText);
   exitText.y = 535;
   exitText.x = 195;
-  
   splash = new PIXI.Sprite(
     PIXI.loader.resources["./images/splash.bmp"].texture, 800, 600);
   menuScene.addChild(splash);
@@ -82,6 +83,10 @@ buttons[3].on('mousedown', exit);
 gameOverScene.visible = false;
 enemies = [];
 bullets = [];
+bgship.vx = 0.5;
+bgship.vy = 0.5;
+bgship.x = 750;
+bgship.y = - 250;
     let left = keyboard("ArrowLeft"),
     up = keyboard("ArrowUp"),
     right = keyboard("ArrowRight"),
@@ -143,6 +148,8 @@ app.ticker.add(delta => gameLoop(delta));
     };
 };
 function menu() {
+  bgship.x -= bgship.vx;
+  bgship.y += bgship.vy;
   if (splash.alpha >= 0){
     fade(splash, 2000, .01)
   }
@@ -151,6 +158,11 @@ function menu() {
   buttons[1].interactive = true;
   buttons[2].interactive = true;
   buttons[3].interactive = true;
+  }
+  if(bgship.y > 650)
+  {
+    bgship.x = 750;
+    bgship.y = - 250;
   }
 };
 
@@ -380,6 +392,8 @@ function start(){
   spaceship.scale.x = 0.65;
   spaceship.vy = 0;
   spaceship.vx = 0;
+  bgship.x = 750;
+  bgship.y = - 250;
   spawnInterval = setInterval(spawn, 2000 / gameSpeed);
   movementInterval = setInterval(movement, 2000);
   gameScene.addChild(spaceship);
