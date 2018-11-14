@@ -1,16 +1,17 @@
 let app = new PIXI.Application();
-let spaceship, state
-let direction = 0;
+let spaceship, state, direction
 document.body.appendChild(app.view);
 PIXI.loader
+  .add("./images/splash.bmp")
   .add("./images/spaceship.bmp")
   .add("./images/gameover.bmp")
   .add("./images/rubble.bmp")
   .add("./images/space.bmp")
   .add("./images/enemy2.png")
   .add("./images/missile.bmp")
-  .add("./images/splash.bmp")
   .add("./images/button.png")
+  .add("./images/astralogo.png")
+  .add("./images/menubackground.bmp")
   .load(setup);
 
 function setup() {
@@ -20,6 +21,15 @@ function setup() {
   app.stage.addChild(gameScene);
   app.stage.addChild(menuScene);
   app.stage.addChild(gameOverScene);
+  menuBG = new PIXI.Sprite(
+    PIXI.loader.resources["./images/menubackground.bmp"].texture, 800, 600);
+  menuScene.addChild(menuBG);
+  button = new PIXI.Sprite(
+    PIXI.loader.resources["./images/button.png"].texture);
+    menuScene.addChild(button);
+  splash = new PIXI.Sprite(
+    PIXI.loader.resources["./images/splash.bmp"].texture, 800, 600);
+  menuScene.addChild(splash);
 gameOverScreen = new PIXI.Sprite(
   PIXI.loader.resources["./images/gameover.bmp"].texture);
   background = new PIXI.extras.TilingSprite(
@@ -28,19 +38,11 @@ gameOverScreen = new PIXI.Sprite(
     PIXI.loader.resources["./images/spaceship.bmp"].texture);
   rubble = new PIXI.extras.TilingSprite(
     PIXI.loader.resources["./images/rubble.bmp"].texture, 800, 600);
-  splash = new PIXI.Sprite(
-    PIXI.loader.resources["./images/splash.bmp"].texture, 800, 600);
-    button = new PIXI.Sprite(
-      PIXI.loader.resources["./images/button.png"].texture);
-      button.interactive = true;
-    menuScene.addChild(splash);
     gameScene.addChild(background);
     gameScene.addChild(rubble);
 gameOverScene.addChild(gameOverScreen);
-menuScene.addChild(button);
-
 button.on('mousedown', startButton);
-gameOverScene.visible = false;  
+gameOverScene.visible = false;
 enemies = [];
 bullets = [];
     let left = keyboard("ArrowLeft"),
@@ -100,21 +102,23 @@ down.release = () => {
 state = menu;
 app.ticker.add(delta => gameLoop(delta));
 
-    function gameLoop(){
-
-      state();
-      background.tilePosition.x -= 0.3;
-      rubble.tilePosition.x -= 0.7;
-
+    function gameLoop(delta){
+      state(delta);
     };
 };
 function menu() {
-  gameOverScene.visible = false;
-  menuScene.visible = true;
+  if (splash.alpha >= 0){
+    fade(splash, 2000, .01)
+  }
+    if (splash.alpha < 0 && state == menu){
+  button.interactive = true;
+  }
 };
 
 
-function play() {
+function play(delta) {
+  background.tilePosition.x -= 0.3;
+  rubble.tilePosition.x -= 0.7;
   random = randomInt(0, 2);
   spaceship.x += spaceship.vx;
   spaceship.y += spaceship.vy;
@@ -131,8 +135,7 @@ function play() {
      {
       if (hitTestRectangle(bullet, enemy)) {
 
-        gameScene.removeChild(enemy);
-         enemies.splice(enemy, 1);
+        enemy.visible = false;
       
        }
     })
@@ -147,15 +150,17 @@ function play() {
   }
     
   if (hitTestRectangle(spaceship, element)) {
-
+    if (element.visible == true)
+    {
     gameScene.removeChild(spaceship);
     state = gameOver;
-
+    }
   }
   });
   };
 function gameOver() {
   gameOverScene.visible = true;
+  menuScene.visible = true;
   clearInterval(spawnInterval);
   enemies.forEach(function(enemy){
   gameScene.removeChild(enemy);
@@ -164,7 +169,14 @@ function gameOver() {
     gameScene.removeChild(bullet);
     });
   enemies = [];
-  setTimeout(function(){state = menu}, 5000);
+  if (gameOverScreen.alpha > 0){
+    fade(gameOverScreen, 1500, .02)
+    console.log(gameOverScreen.alpha)
+  }
+  if (gameOverScreen.alpha < -1.8)
+  {
+  state = menu;
+  }
 }
   
 function keyboard(value) {
@@ -315,6 +327,10 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 function start(){
+  menuScene.visible = false;
+  gameOverScene.visible = false;
+  gameOverScreen.alpha = 1;
+  button.interactive = false;
   spaceship.x = 0;
   spaceship.y = 280;
   spaceship.scale.y = 0.60;
@@ -331,7 +347,15 @@ function start(){
 function startButton (eventData) {
 
   state = start
-  menuScene.visible = false;
   
 console.log(state)
+}
+
+function fade (scene, timeout, speed) {
+  setTimeout(() => fader(scene, speed), timeout);
+
+function fader (scene, speed) {
+  scene.alpha -= speed;
+  console.log(scene.alpha)
+}
 }
