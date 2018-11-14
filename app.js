@@ -12,7 +12,7 @@ PIXI.loader
   .add("./images/space.bmp")
   .add("./images/enemy2.png")
   .add("./images/missile.bmp")
-  .add("./images/button.png")
+  .add("./images/button.bmp")
   .add("./images/astralogo.png")
   .add("./images/menubackground.bmp")
   .load(appStart);
@@ -27,13 +27,34 @@ function appStart() {
   menuBG = new PIXI.Sprite(
     PIXI.loader.resources["./images/menubackground.bmp"].texture, 800, 600);
   menuScene.addChild(menuBG);
+  var i;
+  buttons = [];
+for (i = 0; i < 4; i++) { 
   button = new PIXI.Sprite(
-    PIXI.loader.resources["./images/button.png"].texture);
+    PIXI.loader.resources["./images/button.bmp"].texture);
     menuScene.addChild(button);
-    button2 = new PIXI.Sprite(
-      PIXI.loader.resources["./images/button.png"].texture);
-      menuScene.addChild(button2);
-      button2.x = 400;
+    button.y = 220 + i * 100;
+    button.x = 120;
+    buttons.push(button);
+    console.log(buttons);
+}
+  easyText = new PIXI.Text("Easy");
+  menuScene.addChild(easyText);
+  easyText.y = 245;
+  easyText.x = 190;
+  mediumText = new PIXI.Text("Medium");
+  menuScene.addChild(mediumText);
+  mediumText.y = 345;
+  mediumText.x = 175;
+  hardText = new PIXI.Text("Hard");
+  menuScene.addChild(hardText);
+  hardText.y = 445;
+  hardText.x = 192;
+  exitText = new PIXI.Text("Exit");
+  menuScene.addChild(exitText);
+  exitText.y = 545;
+  exitText.x = 195;
+  
   splash = new PIXI.Sprite(
     PIXI.loader.resources["./images/splash.bmp"].texture, 800, 600);
   menuScene.addChild(splash);
@@ -48,8 +69,10 @@ gameOverScreen = new PIXI.Sprite(
     gameScene.addChild(gameBG);
     gameScene.addChild(rubble);
 gameOverScene.addChild(gameOverScreen);
-button.on('mousedown', startButton);
-button2.on('mousedown', startButton2);
+buttons[0].on('mousedown', slow);
+buttons[1].on('mousedown', medium);
+buttons[2].on('mousedown', fast);
+buttons[3].on('mousedown', exit);
 gameOverScene.visible = false;
 enemies = [];
 bullets = [];
@@ -63,7 +86,6 @@ left.press = () => {
   spaceship.vx = -4;
   spaceship.vy = 0;
 };
-
 
 a.press = () => {
   shoot();
@@ -119,8 +141,10 @@ function menu() {
     fade(splash, 2000, .01)
   }
     if (splash.alpha < 0 && state == menu){
-  button.interactive = true;
-  button2.interactive = true;
+  buttons[0].interactive = true;
+  buttons[1].interactive = true;
+  buttons[2].interactive = true;
+  buttons[3].interactive = true;
   }
 };
 
@@ -340,8 +364,8 @@ function start(){
   menuScene.visible = false;
   gameOverScene.visible = false;
   gameOverScreen.alpha = 1;
-  button.interactive = false;
-  button2.interactive = false;
+  buttons[1].interactive = false;
+  buttons[2].interactive = false;
   spaceship.x = 0;
   spaceship.y = 280;
   spaceship.scale.y = 0.60;
@@ -355,14 +379,23 @@ function start(){
   state = play;
 }
 
-function startButton (eventData) {
+function slow (eventData) {
   gameSpeed = 1;
   start();
 }
 
-function startButton2 (eventData) {
+function medium (eventData) {
+  gameSpeed = 2;
+  start();
+}
+
+function fast (eventData) {
   gameSpeed = 5;
   start();
+}
+
+function exit (eventData) {
+  window.location.href = "https://github.com/dugasmate"
 }
 
 function fade (scene, timeout, speed) {
