@@ -1,5 +1,8 @@
 let app = new PIXI.Application();
-let spaceship, state, direction, gameSpeed
+let spaceship, state, gameSpeed, direction = 0,
+bulletCount = 0, 
+tick = 0,
+random = 0;
 document.body.appendChild(app.view);
 PIXI.loader
   .add("./images/splash.bmp")
@@ -125,30 +128,35 @@ function menu() {
 function play(delta) {
   gameBG.tilePosition.x -= 0.3 * gameSpeed;
   rubble.tilePosition.x -= 0.7 * gameSpeed;
-  random = randomInt(0, 2);
   spaceship.x += spaceship.vx;
   spaceship.y += spaceship.vy;
   contain(spaceship)
   bullets.forEach(function(bullet){
-    bullet.x += 5;
+  bullet.x += 5;
     if (bullet.x > 800)
     {
+      if (bullet.visible)
+      {
+      bullet.visible = false;
       gameScene.removeChild(bullet);
-      bullets.splice(bullet, 1);
+      bulletCount -= 1;
+    }
+      
     }
       
      enemies.forEach(function(enemy)
      {
-      if (hitTestRectangle(bullet, enemy)) {
+      if (hitTestRectangle(bullet, enemy) && bullet.visible && enemy.visible) {
 
         enemy.visible = false;
-      
+        bullet.visible = false;
+        bulletCount -= 1;
        }
     })
   });
   enemies.forEach(function(element) {
   element.x -= 1 * gameSpeed;
-  element.y += direction * random;
+  element.y += element.vy * gameSpeed;
   containEnemy(element);
   if (element.x < -100)
   {
@@ -168,7 +176,7 @@ function gameOver() {
   gameOverScene.visible = true;
   menuScene.visible = true;
   clearInterval(spawnInterval);
-  clearInterval(directionInterval);
+  clearInterval(movementInterval);
   enemies.forEach(function(enemy){
   gameScene.removeChild(enemy);
   });
@@ -176,6 +184,8 @@ function gameOver() {
     gameScene.removeChild(bullet);
     });
   enemies = [];
+  bullets = [];
+  bulletCount = 0;
   if (gameOverScreen.alpha > 0){
     fade(gameOverScreen, 1500, .02)
   }
@@ -264,13 +274,15 @@ function spawn (){
   PIXI.loader.resources["./images/enemy2.png"].texture);
   enemy.x = 800;
   enemy.y = randomInt(0, 600 - enemy.height);
+  enemy.vy = randomInt(-1, 1);
   gameScene.addChild(enemy);
   enemies.push(enemy);
 }
 
 function shoot (){
-    if (bullets.length < 5)
+    if (bulletCount < 5)
     {
+      bulletCount +=1;
       let bullet = new PIXI.Sprite(
         PIXI.loader.resources["./images/missile.bmp"].texture);
         gameScene.addChild(bullet);
@@ -278,14 +290,9 @@ function shoot (){
         bullet.scale.y = 0.1;
         bullet.x = spaceship.x + 90;
         bullet.y = spaceship.y + 25;
-    bullets.push(bullet);
+        bullets.push(bullet);
     }
 };
-
-function setDirection(){
-      direction = randomInt(-1, 1) * (gameSpeed / 2);
-      console.log(direction);
-}
 
 function hitTestRectangle(r1, r2) {
 
@@ -341,8 +348,8 @@ function start(){
   spaceship.scale.x = 0.75;
   spaceship.vy = 0;
   spaceship.vx = 0;
-  directionInterval = setInterval(setDirection, 2000 / gameSpeed);
   spawnInterval = setInterval(spawn, 2000 / gameSpeed);
+  movementInterval = setInterval(movement, 2000);
   gameScene.addChild(spaceship);
   gameScene.visible = true;
   state = play;
@@ -354,7 +361,7 @@ function startButton (eventData) {
 }
 
 function startButton2 (eventData) {
-  gameSpeed = 10;
+  gameSpeed = 5;
   start();
 }
 
@@ -364,4 +371,21 @@ function fade (scene, timeout, speed) {
 function fader (scene, speed) {
   scene.alpha -= speed;
 }
+}
+function movement ()
+{
+  enemies.forEach(function(enemy)
+  {
+    if (enemy.y == 0){
+      enemy.vy = 2;
+    }
+    else if (enemy.y == 600 - enemy.height)
+    {
+      enemy.vy = -2;
+    }
+    else{
+    enemy.vy = randomInt(-1, 1)
+    }
+  })
+
 }
